@@ -21,15 +21,13 @@ public class Server {
     boolean isListening = false;
     ServerSocket serverSocket;
 
-    public static ArrayList<Client> connectedClients;
+//    public static ArrayList<Client> connectedClients;
 
+    // ip address and port number of server
     int port;
     InetAddress ipAddress;
 
     ClientHandler clientHandler;
-    Client client;
-
- 
 
     Server() {
     }
@@ -40,7 +38,6 @@ public class Server {
             serverSocket = new ServerSocket(this.port);
             System.out.println("Server started");
             this.ipAddress = serverSocket.getInetAddress();
-            connectedClients = new ArrayList<>();
             return true;
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);

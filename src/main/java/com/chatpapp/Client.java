@@ -34,9 +34,10 @@ public class Client extends Thread {
     String ServerResponse;
 
     //
-    SignIn signInFrm;
+    public static SignIn signInFrm;
+    public static SignUp signUp;
 
-    Client(int port, String ipAddress) throws UnknownHostException {
+    Client(String ipAddress, int port) throws UnknownHostException {
         this.port = port;
         this.ipAddress = InetAddress.getByName(ipAddress);
     }
@@ -68,12 +69,40 @@ public class Client extends Thread {
                 System.out.println(ServerResponse);
                 String[] responses = ServerResponse.split(",");
                 if (responses[0].equals("11")) {
-                    System.out.println("correct data");
+                    System.out.println("Sign in succefully....");
                 } else if (responses[0].equals("10")) {
-                    System.out.println("Invalid email or password.");
-                    JOptionPane.showMessageDialog(signInFrm, "Invalid email or password.");
+                    System.out.println("Wrong password...");
+                    JOptionPane.showMessageDialog(signInFrm, "Wrong password....");
+                } else if (responses[0].equals("00")) {
+                    int selection = JOptionPane.showConfirmDialog(signInFrm, "Email not registerd, create account?");
+                    switch (selection) {
+                        case JOptionPane.YES_OPTION:
+                            signInFrm.setVisible(false);
+                            signUp = new SignUp();
+                            signUp.setVisible(true);
+                            break;
+
+                        case JOptionPane.NO_OPTION:
+                            signInFrm.setVisible(false);
+                            break;
+                        case JOptionPane.CANCEL_OPTION:
+                            continue;
+                    }
+                }
+                if (ServerResponse.equals("clinetRemoved")) {
+                    DisconnectFromServer();
                 }
 
+                if (responses[0].equals("20")) {
+                    System.out.println("Email is already used");
+                } else if (responses[0].equals("21")) {
+                    System.out.println("new user created");
+                    signUp.setVisible(false);
+                    signInFrm.setVisible(true);
+                    // go back to sign in page 
+                } else if (responses[0].equals("201")) {
+                    System.out.println("faild to register this user");
+                }
             } catch (IOException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }

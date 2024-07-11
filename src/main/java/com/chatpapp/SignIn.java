@@ -8,10 +8,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -19,24 +18,35 @@ import javax.swing.JOptionPane;
  */
 public class SignIn extends javax.swing.JFrame {
 
-    Client client;
+    static Client client;
     String dataToSend;
+    
 
     /**
      * Creates new form SignIn
      */
     public SignIn() throws UnknownHostException, IOException {
         initComponents();
-        client = new Client(5000, "localhost");
+        client = new Client("localhost", 5000);
+        dataToSend = "";
+        Client.signInFrm=this;
         client.ConnectToServer();
         client.Listen();
 //        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                client.DisconnectFromServer();
+                try {
+                    dataToSend += "exit";
+                    client.sendDataToServer(dataToSend);
+//                    client.DisconnectFromServer();
+
+                } catch (IOException ex) {
+                    Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
+        dataToSend = "";
 
     }
 
@@ -112,6 +122,9 @@ public class SignIn extends javax.swing.JFrame {
             dataToSend += ",";
             dataToSend += new String(passwordTxtField.getPassword());
             client.sendDataToServer(dataToSend);
+            emailTxtField.setText("");
+            passwordTxtField.setText("");
+
         } catch (IOException ex) {
             Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
         }
