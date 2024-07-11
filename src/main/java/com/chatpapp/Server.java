@@ -4,8 +4,6 @@
  */
 package com.chatpapp;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -23,13 +21,15 @@ public class Server {
     boolean isListening = false;
     ServerSocket serverSocket;
 
-    static ArrayList<Client> connectedClients;
+    public static ArrayList<Client> connectedClients;
 
     int port;
     InetAddress ipAddress;
 
     ClientHandler clientHandler;
     Client client;
+
+ 
 
     Server() {
     }

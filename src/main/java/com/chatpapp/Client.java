@@ -10,52 +10,97 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author basha
  */
-public class Client {
+public class Client extends Thread {
 
-    int serverPort;
-    InetAddress ServerIpAddress;
-    String name;
-    String lastName;
-    String email;
-
+    int port;
+    InetAddress ipAddress;
     Socket socket;
     DataInputStream in;
     DataOutputStream out;
 
+    String name;
+    String lastName;
+    String email;
+
+    boolean isConnected;
+    String ServerResponse;
+
+    //
+    SignIn signInFrm;
+
     Client(int port, String ipAddress) throws UnknownHostException {
-        this.serverPort = port;
-        this.ServerIpAddress = InetAddress.getByName(ipAddress);
+        this.port = port;
+        this.ipAddress = InetAddress.getByName(ipAddress);
     }
 
     public boolean ConnectToServer() throws IOException {
-        socket = new Socket(this.ServerIpAddress, this.serverPort);
-
+        socket = new Socket(this.ipAddress, this.port);
         out = new DataOutputStream(socket.getOutputStream());
         in = new DataInputStream(socket.getInputStream());
-
         System.out.println("Connection accepted with server -> " + socket.getInetAddress() + ":" + socket.getPort());
-        Scanner scanner = new Scanner(System.in);
-        String message = "";
-
-        System.out.println("Enter message please: ");
-        while (!message.equals("exit")) {
-            message = scanner.nextLine();
-            out.writeUTF(message);
-            if(message.equals("exit")){
-                socket.close();
-            }
-        }
+        isConnected = true;
         return true;
     }
 
-    public static void main(String[] args) throws UnknownHostException, IOException {
-        Client c = new Client(5000, "localhost");
-        c.ConnectToServer();
+    public void sendDataToServer(String message) throws IOException {
+        out.writeUTF(message);
+
     }
+
+    public void Listen() {
+        this.start();
+    }
+
+    @Override
+    public void run() {
+        while (isConnected) {
+            try {
+                ServerResponse = "";
+                ServerResponse = in.readUTF();
+                System.out.println(ServerResponse);
+                String[] responses = ServerResponse.split(",");
+                if (responses[0].equals("11")) {
+                    System.out.println("correct data");
+                } else if (responses[0].equals("10")) {
+                    System.out.println("Invalid email or password.");
+                    JOptionPane.showMessageDialog(signInFrm, "Invalid email or password.");
+                }
+
+            } catch (IOException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public void DisconnectFromServer() {
+        isConnected = false;
+        try {
+
+            if (socket != null) {
+                this.socket.close();
+            }
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+
+        } catch (IOException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+//    public static void main(String[] args) throws UnknownHostException, IOException {
+//        Client c = new Client(5000, "localhost");
+//        c.ConnectToServer();
+//    }
 }
